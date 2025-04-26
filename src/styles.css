@@ -120,6 +120,14 @@ header {
   gap: 20px;
 }
 
+/* Enhancing UI structure by defining a grid layout for the main container */
+.main-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 20px;
+}
+
 .dashboard {
   flex: 1;
   min-width: 300px;
@@ -287,8 +295,8 @@ select {
 
 .tab-content.active {
   display: block;
-  /* Bug #24: overflow-y should be set to auto */
   height: 370px;
+  overflow-y: auto;
 }
 
 /* Transaction List */
