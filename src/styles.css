@@ -115,7 +115,7 @@ header {
   width: 95%;
   max-width: 1200px;
   margin: 0 auto;
-  /* Bug #23: display should flex */
+  display: flex; /* Adding display flex to properly structure the layout */
   flex-wrap: wrap;
   gap: 20px;
 }

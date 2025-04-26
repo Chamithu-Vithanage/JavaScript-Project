@@ -146,19 +146,23 @@ function removeTransaction(id) {
 function updateValues(balanceEl, incomeEl, expenseEl) {
   const amounts = transactions.map((transaction) => transaction.amount);
 
-  const total = amounts.reduce((acc, amount) => acc + amount, 0);
-
+  // Calculate income (sum of all positive amounts)
   const income = amounts
     .filter((amount) => amount > 0)
     .reduce((acc, amount) => acc + amount, 0);
 
+  // Calculate expenses (sum of all negative amounts as a positive number)
   const expense = amounts
     .filter((amount) => amount < 0)
-    .reduce((acc, amount) => acc - amount, 0);
+    .reduce((acc, amount) => acc + Math.abs(amount), 0);
 
-    balanceEl.textContent = `Rs ${total.toFixed(2)}`;
-    incomeEl.textContent = `+Rs ${income.toFixed(2)}`;
-    expenseEl.textContent = `-Rs ${Math.abs(expense).toFixed(2)}`;
+  // Calculate balance as income minus expenses
+  const balance = income - expense;
+
+  // Update UI elements with formatted values
+  balanceEl.textContent = `Rs ${balance.toFixed(2)}`;
+  incomeEl.textContent = `+Rs ${income.toFixed(2)}`;
+  expenseEl.textContent = `-Rs ${expense.toFixed(2)}`;
 }
 
 // Add transactions to DOM
