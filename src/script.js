@@ -86,7 +86,9 @@ function addTransaction(e, descriptionEl, amountEl, categoryEl, dateEl) {
   categoryEl.value = "Other";
   dateEl.value = "";
 
-  init();
+  console.log("Transaction added:", newTransaction);
+
+  // init();
 }
 
 // Generate unique ID
@@ -110,9 +112,10 @@ function removeTransaction(id) {
 function updateValues(balanceEl, incomeEl, expenseEl) {
   const amounts = transactions.map((transaction) => transaction.amount);
 
-  const total = amounts.reduce((acc, amount) => {
-    return (acc = amount);
-  }, 0);
+  // const total = amounts.reduce((acc, amount) => {
+  //   return (acc = amount);
+  // }, 0);
+  const total = amounts.reduce((acc, amount) => acc + amount, 0);
 
   const income = amounts
     .filter((amount) => amount > 0)
@@ -122,9 +125,11 @@ function updateValues(balanceEl, incomeEl, expenseEl) {
     .filter((amount) => amount < 0)
     .reduce((acc, amount) => acc - amount, 0);
 
-  balanceEl.textContent = `Rs ${total}`;
-  incomeEl.textContent = `+Rs ${income}`;
-  expenseEl.textContent = `-Rs ${Math.abs(expense)}`;
+    balanceEl.textContent = `Rs ${total.toFixed(2)}`;
+    incomeEl.textContent = `+Rs ${income.toFixed(2)}`;
+    expenseEl.textContent = `-Rs ${Math.abs(expense).toFixed(2)}`;  // balanceEl.textContent = `Rs ${total}`;
+  // incomeEl.textContent = `+Rs ${income}`;
+  // expenseEl.textContent = `-Rs ${Math.abs(expense)}`;
 }
 
 // Add transactions to DOM
