@@ -56,20 +56,51 @@ let transactions = getTransactionsFromStorage();
 function addTransaction(e, descriptionEl, amountEl, categoryEl, dateEl) {
   e.preventDefault();
 
-  // Input validation
+  // Enhanced input validation
   const description = descriptionEl.value.trim();
-  const amount = parseFloat(amountEl.value);
+  const amountStr = amountEl.value.trim();
   const category = categoryEl.value;
   const date = dateEl.value;
 
-  if (!description || isNaN(amount) || !category || !date) {
-    alert("Please fill in all fields with valid data.");
+  // Validate all inputs thoroughly
+  if (!description) {
+    alert("Please enter a description for the transaction.");
+    descriptionEl.focus();
     return;
   }
-  // const description = descriptionEl.value;
-  // const category = categoryEl.value;
-  // const date = dateEl.value;
 
+  if (!amountStr) {
+    alert("Please enter an amount for the transaction.");
+    amountEl.focus();
+    return;
+  }
+
+  const amount = parseFloat(amountStr);
+  if (isNaN(amount)) {
+    alert("Please enter a valid number for the amount.");
+    amountEl.focus();
+    return;
+  }
+
+  if (amount === 0) {
+    alert("Amount cannot be zero. Please enter a non-zero value.");
+    amountEl.focus();
+    return;
+  }
+
+  if (!category) {
+    alert("Please select a category for the transaction.");
+    categoryEl.focus();
+    return;
+  }
+
+  if (!date) {
+    alert("Please select a date for the transaction.");
+    dateEl.focus();
+    return;
+  }
+
+  // Create transaction object
   const newTransaction = {
     id: generateID(),
     description,
@@ -78,17 +109,20 @@ function addTransaction(e, descriptionEl, amountEl, categoryEl, dateEl) {
     date,
   };
 
+  // Add to transactions array
   transactions.push(newTransaction);
   updateLocalStorage();
 
+  // Reset form with improved user experience
   descriptionEl.value = "";
   amountEl.value = "";
   categoryEl.value = "Other";
-  dateEl.value = "";
+  dateEl.valueAsDate = new Date(); // Reset to today's date instead of clearing
+  
+  // Focus on the description field for the next entry
+  descriptionEl.focus();
 
   console.log("Transaction added:", newTransaction);
-
-  // init();
 }
 
 // Generate unique ID
@@ -112,9 +146,6 @@ function removeTransaction(id) {
 function updateValues(balanceEl, incomeEl, expenseEl) {
   const amounts = transactions.map((transaction) => transaction.amount);
 
-  // const total = amounts.reduce((acc, amount) => {
-  //   return (acc = amount);
-  // }, 0);
   const total = amounts.reduce((acc, amount) => acc + amount, 0);
 
   const income = amounts
@@ -127,9 +158,7 @@ function updateValues(balanceEl, incomeEl, expenseEl) {
 
     balanceEl.textContent = `Rs ${total.toFixed(2)}`;
     incomeEl.textContent = `+Rs ${income.toFixed(2)}`;
-    expenseEl.textContent = `-Rs ${Math.abs(expense).toFixed(2)}`;  // balanceEl.textContent = `Rs ${total}`;
-  // incomeEl.textContent = `+Rs ${income}`;
-  // expenseEl.textContent = `-Rs ${Math.abs(expense)}`;
+    expenseEl.textContent = `-Rs ${Math.abs(expense).toFixed(2)}`;
 }
 
 // Add transactions to DOM
@@ -297,14 +326,16 @@ function generateReport() {
     .filter((t) => t.amount > 0)
     .reduce((acc, t) => acc + t.amount, 0);
 
+  // Fix: Filter for negative amounts for expenses
   const totalExpense = transactions
-    .filter((t) => t.amount > 0)
-    .reduce((acc, t) => acc + t.amount, 0);
+    .filter((t) => t.amount < 0)
+    .reduce((acc, t) => acc + Math.abs(t.amount), 0);
 
   const balance = totalIncome - totalExpense;
 
+  // Consistent decimal formatting for all monetary values
   reportText += `Total Income: Rs ${totalIncome.toFixed(2)}\n`;
-  reportText += `Total Expense: Rs ${Math.abs(totalExpense).toFixed(2)}\n`;
+  reportText += `Total Expense: Rs ${totalExpense.toFixed(2)}\n`;
   reportText += `Balance: Rs ${balance.toFixed(2)}\n\n`;
 
   // Category breakdown
@@ -312,12 +343,21 @@ function generateReport() {
 
   const categorySummary = {};
 
+  // Initialize all categories with zero
+  transactions.forEach((t) => {
+    if (t.amount < 0 && !categorySummary[t.category]) {
+      categorySummary[t.category] = 0;
+    }
+  });
+
+  // Sum expenses by category
   transactions.forEach((t) => {
     if (t.amount < 0) {
       categorySummary[t.category] += Math.abs(t.amount);
     }
   });
 
+  // Format and display each category
   for (const category in categorySummary) {
     reportText += `${category}: Rs ${categorySummary[category].toFixed(2)}\n`;
   }
