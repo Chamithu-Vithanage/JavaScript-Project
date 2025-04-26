@@ -86,7 +86,9 @@ function addTransaction(e, descriptionEl, amountEl, categoryEl, dateEl) {
   categoryEl.value = "Other";
   dateEl.value = "";
 
-  init();
+  console.log("Transaction added:", newTransaction);
+
+  // init();
 }
 
 // Generate unique ID
@@ -110,9 +112,10 @@ function removeTransaction(id) {
 function updateValues(balanceEl, incomeEl, expenseEl) {
   const amounts = transactions.map((transaction) => transaction.amount);
 
-  const total = amounts.reduce((acc, amount) => {
-    return (acc = amount);
-  }, 0);
+  // const total = amounts.reduce((acc, amount) => {
+  //   return (acc = amount);
+  // }, 0);
+  const total = amounts.reduce((acc, amount) => acc + amount, 0);
 
   const income = amounts
     .filter((amount) => amount > 0)
@@ -122,9 +125,11 @@ function updateValues(balanceEl, incomeEl, expenseEl) {
     .filter((amount) => amount < 0)
     .reduce((acc, amount) => acc - amount, 0);
 
-  balanceEl.textContent = `Rs ${total}`;
-  incomeEl.textContent = `+Rs ${income}`;
-  expenseEl.textContent = `-Rs ${Math.abs(expense)}`;
+    balanceEl.textContent = `Rs ${total.toFixed(2)}`;
+    incomeEl.textContent = `+Rs ${income.toFixed(2)}`;
+    expenseEl.textContent = `-Rs ${Math.abs(expense).toFixed(2)}`;  // balanceEl.textContent = `Rs ${total}`;
+  // incomeEl.textContent = `+Rs ${income}`;
+  // expenseEl.textContent = `-Rs ${Math.abs(expense)}`;
 }
 
 // Add transactions to DOM
@@ -133,7 +138,8 @@ function addTransactionDOM(transaction, transactionListEl) {
 
   const item = document.createElement("li");
 
-  item.className = transaction.category === "income" ? "expense" : "income";
+  // Fix incorrect class assignment - base it on amount instead of category name
+  item.className = transaction.amount < 0 ? "expense" : "income";
 
   const detailsDiv = document.createElement("div");
   detailsDiv.className = "details";
@@ -419,8 +425,8 @@ function deleteCategory(categoryName) {
 
     // Update transactions with this category to "Other" or first available category
     const defaultCategory = "Other";
-    const transactions = getTransactionsFromStorage();
-
+    
+    // Use the global transactions variable instead of redeclaring it
     transactions.forEach((transaction) => {
       if (transaction.category === categoryName) {
         transaction.category = defaultCategory;
@@ -447,18 +453,15 @@ function updateCategoryDropdowns(categoryDropdowns) {
     const currentValue = dropdown.value;
     dropdown.innerHTML = "";
 
-    // Add all categories
+    // Add all categories without unnecessary formatting
     categories.forEach((category) => {
-      dropdown.insertAdjacentHTML(
-        "beforeend",
-        `<option value="${category.toLowerCase()}">${category}</option>`
-      );
+      const option = document.createElement("option");
+      option.value = category;
+      option.textContent = category;
+      dropdown.appendChild(option);
     });
 
-    if (
-      currentValue &&
-      dropdown.querySelector(`option[value="${currentValue}"]`)
-    ) {
+    if (currentValue && dropdown.querySelector(`option[value="${currentValue}"]`)) {
       dropdown.value = currentValue;
     }
   });
